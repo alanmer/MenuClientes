@@ -3,8 +3,12 @@ package com.bolsadeideas.springbootjpa.controllers;
 import com.bolsadeideas.springbootjpa.models.dao.IClienteDao;
 import com.bolsadeideas.springbootjpa.models.entity.Cliente;
 import com.bolsadeideas.springbootjpa.models.service.IClienteService;
+import com.bolsadeideas.springbootjpa.util.paginator.PageRender;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,9 +25,14 @@ public class ClienteController {
     @Autowired
     private IClienteService clienteService;
     @GetMapping (value = "/listar")
-    public String listar(Model model){
+    public String listar(@RequestParam(name = "page",defaultValue = "0") int page, Model model){
+        Pageable pageRequest =  PageRequest.of(page,4);
+        Page<Cliente> clientes=clienteService.findAll(pageRequest);
+
+        PageRender<Cliente>pageRender=new PageRender<>("/listar",clientes);
+        model.addAttribute("page",pageRender);
         model.addAttribute("titulo","Listado de clientes");
-        model.addAttribute("clientes",clienteService.findAll());
+        model.addAttribute("clientes",clientes);
         return "listar";
 
     }
